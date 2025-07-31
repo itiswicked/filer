@@ -21,7 +21,7 @@ services:
     volumes:
       - .:/app
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/filer?schema=public
+      - DATABASE_URL=${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@db:5432/filer?schema=public}
     depends_on:
       db:
         condition: service_healthy

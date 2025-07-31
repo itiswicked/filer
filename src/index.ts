@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { PrismaClient } from '@prisma/client';
+import { Filer } from './filer/filer';
 
-const prisma = new PrismaClient();
 const program = new Command();
 
 program
@@ -22,8 +21,8 @@ async function getSnapshot(id: string) {
 }
 
 // Command 3: Create snapshot
-async function createSnapshot(directoryId: string) {
-  console.log('Function: createSnapshot', { directoryId });
+async function createSnapshot(path: string) {
+  await Filer.createSnapshot(path);
 }
 
 program
@@ -37,8 +36,8 @@ program
   .action(getSnapshot);
 
 program
-  .command('create <directoryId>')
-  .description('Create a new snapshot')
+  .command('create <path>')
+  .description('Create a new snapshot for the specified directory path')
   .action(createSnapshot);
 
 async function main() {
@@ -48,7 +47,7 @@ async function main() {
     console.error('Error:', error);
     process.exit(1);
   } finally {
-    await prisma.$disconnect();
+    await disconnectPrisma();
   }
 }
 
