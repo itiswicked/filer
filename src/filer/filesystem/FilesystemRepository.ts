@@ -28,7 +28,8 @@ export class FilesystemRepository {
         });
       } else if (entry.isDirectory()) {
         entries.push({
-          path: relativePath + '/'
+          path: relativePath + '/',
+          content: undefined
         });
 
         // Recursively scan subdirectory
