@@ -3,7 +3,7 @@
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-arm64-openssl-1.1.x", "linux-arm64-openssl-3.0.x"]
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -12,32 +12,53 @@ datasource db {
 }
 
 model Object {
-  id         Int      @id @default(autoincrement())
-  name       String
+  id   Int    @id @default(autoincrement())
+  name String
+
   snapshotId Int      @map("snapshot_id")
   snapshot   Snapshot @relation(fields: [snapshotId], references: [id])
-  blob       String?  @map("bytea")
+
+  Blob   Blob? @relation(fields: [blobId], references: [id])
+  blobId Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("objects")
 }
 
+model Blob {
+  id      Int      @id @default(autoincrement())
+  data    Bytes
+  objects Object[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("blobs")
+}
+
 model Snapshot {
-  id          Int        @id @default(autoincrement())
-  parentId    Int?       @map("parent_id")
-  parent      Snapshot?  @relation("SnapshotToSnapshot", fields: [parentId], references: [id])
-  children    Snapshot[] @relation("SnapshotToSnapshot")
-  directoryId Int        @map("directory_id")
-  directory   Directory  @relation(fields: [directoryId], references: [id])
-  sequenceRef Int        @map("sequence_ref")
+  id Int @id @default(autoincrement())
+
+  directoryId Int       @map("directory_id")
+  directory   Directory @relation(fields: [directoryId], references: [id])
   objects     Object[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("snapshots")
 }
 
 model Directory {
-  id        Int        @id @default(autoincrement())
-  path      Int
+  id   Int    @id @default(autoincrement())
+  path String @unique
+
   snapshots Snapshot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("directory")
 }
