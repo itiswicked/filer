@@ -40,4 +40,17 @@ export class SnapshotRepository {
       where: { id }
     });
   }
+
+  async findAllByDirectoryPath(directoryPath: string): Promise<Snapshot[]> {
+    return await prisma.snapshot.findMany({
+      where: {
+        directory: {
+          path: directoryPath
+        }
+      },
+      orderBy: {
+        number: 'asc'
+      }
+    });
+  }
 }

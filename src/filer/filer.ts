@@ -1,11 +1,13 @@
 import { SnapshotCreateService } from './snapshot/SnapshotCreateService';
 import { SnapshotRestoreService } from './snapshot/SnapshotRestoreService';
 import { SnapshotPruneService } from './snapshot/SnapshotPruneService';
+import { SnapshotListService } from './snapshot/SnapshotListService';
 
 export class Filer {
   private static snapshotCreateService = new SnapshotCreateService();
   private static snapshotRestoreService = new SnapshotRestoreService();
   private static snapshotPruneService = new SnapshotPruneService();
+  private static snapshotListService = new SnapshotListService();
 
   static async createSnapshot(path: string) {
     return await this.snapshotCreateService.createSnapshot(path);
@@ -17,5 +19,9 @@ export class Filer {
 
   static async pruneSnapshot(path: string, snapshotNumber: number) {
     return await this.snapshotPruneService.pruneSnapshot(path, snapshotNumber);
+  }
+
+  static async listSnapshots(directoryPath: string) {
+    return await this.snapshotListService.listSnapshots(directoryPath);
   }
 }

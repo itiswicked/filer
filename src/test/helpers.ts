@@ -14,7 +14,8 @@ export async function cleanDatabase() {
 
 // Filesystem helpers
 export async function createTempDirectory(name?: string): Promise<string> {
-  const testDir = join(tmpdir(), 'filer-test');
+  const dirName = name || `filer-test-${Date.now()}-${Math.random().toString(36).substring(2)}`;
+  const testDir = join(tmpdir(), dirName);
   await mkdir(testDir, { recursive: true });
   return testDir;
 }
