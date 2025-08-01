@@ -25,4 +25,19 @@ export class SnapshotRepository {
       }
     });
   }
+
+  async findByDirectoryAndNumber(directoryId: number, number: number): Promise<Snapshot | null> {
+    return await prisma.snapshot.findFirst({
+      where: {
+        directoryId,
+        number
+      }
+    });
+  }
+
+  async delete(id: number): Promise<void> {
+    await prisma.snapshot.delete({
+      where: { id }
+    });
+  }
 }

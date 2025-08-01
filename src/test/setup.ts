@@ -13,6 +13,11 @@ beforeEach(async () => {
   await cleanDatabase();
 });
 
+// Clean up before all tests (for watch mode)
+beforeAll(async () => {
+  await cleanDatabase();
+});
+
 // Disconnect after all tests
 afterAll(async () => {
   await prisma.$disconnect();

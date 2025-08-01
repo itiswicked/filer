@@ -8,13 +8,11 @@ export class SnapshotRestoreService {
 
   async restoreSnapshot(snapshotId: number, directoryPath: string): Promise<string> {
     const directory = await this.directoryRepository.findByPath(directoryPath);
-
     if (!directory) {
       throw new Error(`Directory not found: ${directoryPath}`);
     }
 
     const snapshot = await this.snapshotRepository.findByIdWithObjectsAndBlobs(snapshotId);
-
     if (!snapshot) {
       throw new Error(`Snapshot with id ${snapshotId} not found`);
     }

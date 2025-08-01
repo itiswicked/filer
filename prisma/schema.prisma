@@ -16,10 +16,10 @@ model Object {
   name String
 
   snapshotId Int      @map("snapshot_id")
-  snapshot   Snapshot @relation(fields: [snapshotId], references: [id])
+  snapshot   Snapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   Blob   Blob? @relation(fields: [blobId], references: [id])
-  blobId Int?
+  blobId Int?  @map("blob_id")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
