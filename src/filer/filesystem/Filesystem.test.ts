@@ -1,16 +1,14 @@
-import { FilesystemRepository } from './FilesystemRepository';
+import { Filesystem } from './Filesystem';
 import {
   createTempDirectory,
   createTestDirectoryStructure,
   cleanupTempDirectory
 } from '../../test/helpers';
 
-describe('FilesystemRepository', () => {
+describe('Filesystem', () => {
   let tempDir: string;
-  let filesystemRepository: FilesystemRepository;
 
   beforeEach(async () => {
-    filesystemRepository = new FilesystemRepository();
     tempDir = await createTempDirectory();
   });
 
@@ -28,7 +26,7 @@ describe('FilesystemRepository', () => {
       });
 
       // Scan the directory
-      const entries = await filesystemRepository.entries(tempDir);
+      const entries = await Filesystem.read(tempDir);
 
       // Assert correct number of entries
       expect(entries.length).toBe(3);
@@ -66,7 +64,7 @@ describe('FilesystemRepository', () => {
       });
 
       // Scan the directory
-      const entries = await filesystemRepository.entries(tempDir);
+      const entries = await Filesystem.read(tempDir);
 
       // Assert correct number of entries (4 files + 3 directories)
       expect(entries.length).toBe(7);
@@ -108,7 +106,7 @@ describe('FilesystemRepository', () => {
     });
 
     it('should handle empty directory', async () => {
-      const entries = await filesystemRepository.entries(tempDir);
+      const entries = await Filesystem.read(tempDir);
 
       expect(entries.length).toBe(0);
     });
@@ -120,7 +118,7 @@ describe('FilesystemRepository', () => {
         'binary.dat': Buffer.from([0x00, 0x01, 0xFF, 0xFE]).toString()
       });
 
-      const entries = await filesystemRepository.entries(tempDir);
+      const entries = await Filesystem.read(tempDir);
 
       expect(entries.length).toBe(2);
 
@@ -142,7 +140,7 @@ describe('FilesystemRepository', () => {
         }
       });
 
-      const entries = await filesystemRepository.entries(tempDir);
+      const entries = await Filesystem.read(tempDir);
 
       // Find the deep file
       const deepFile = entries.find(entry => entry.path === 'level1/level2/deep.txt');

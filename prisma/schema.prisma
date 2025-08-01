@@ -40,7 +40,8 @@ model Blob {
 }
 
 model Snapshot {
-  id Int @id @default(autoincrement())
+  id     Int @id @default(autoincrement())
+  number Int
 
   directoryId Int       @map("directory_id")
   directory   Directory @relation(fields: [directoryId], references: [id])

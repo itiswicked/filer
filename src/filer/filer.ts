@@ -1,12 +1,15 @@
-import { SnapshotService } from './snapshot/SnapshotService';
-import { ObjectService } from './object/ObjectService';
+import { SnapshotCreateService } from './snapshot/SnapshotCreateService';
+import { SnapshotRestoreService } from './snapshot/SnapshotRestoreService';
 
 export class Filer {
-  private static snapshotService = new SnapshotService();
-  private static objectService = new ObjectService();
+  private static snapshotCreateService = new SnapshotCreateService();
+  private static snapshotRestoreService = new SnapshotRestoreService();
 
   static async createSnapshot(path: string) {
-    const snapshot = await this.snapshotService.createSnapshot(path);
-    const objects = await this.objectService.createObjectsFromDirectory(path, snapshot.id);
+    return await this.snapshotCreateService.createSnapshot(path);
+  }
+
+  static async restoreSnapshot(snapshotId: number, directoryPath: string) {
+    return await this.snapshotRestoreService.restoreSnapshot(snapshotId, directoryPath);
   }
 }

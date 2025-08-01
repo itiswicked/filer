@@ -1,7 +1,7 @@
 import { SnapshotRepository } from './SnapshotRepository';
 import { DirectoryRepository } from '../directory/DirectoryRepository';
 import { Snapshot } from '@prisma/client';
-import { FilesystemRepository } from '../filesystem/FilesystemRepository';
+import { Filesystem, FileSystemEntry } from '../filesystem/Filesystem';
 import { ObjectRepository } from '../object/ObjectRepository';
 import { prisma } from '../../lib/prisma';
 import { Prisma, Blob as PrismaBlob } from '@prisma/client';
@@ -9,19 +9,22 @@ import { hashifyContent } from '../../lib/cryptoHelper';
 import { objectFromEntries } from '../../lib/generic';
 
 
-export class SnapshotService {
+export class SnapshotCreateService {
   private snapshotRepository = new SnapshotRepository();
   private directoryRepository = new DirectoryRepository();
 
   private objectRepository = new ObjectRepository();
 
   async createSnapshot(path: string): Promise<Snapshot> {
-    const filesystemRepository = new FilesystemRepository();
-    const fileSystemObjects = await filesystemRepository.entries(path);
+    const fileSystemObjects = await Filesystem.read(path);
 
-    const directory = await this.directoryRepository.findOrCreate(path);
-    const snapshot = await this.snapshotRepository.create(directory.id);
-    const previousSnapshot = await this.snapshotRepository.findParentSnapshot(snapshot);
+    const directory = await this.directoryRepository .findOrCreate(path);
+
+    const previousSnapshot = await this.snapshotRepository.findLatestByDirectory(directory.id);
+
+    // Calculate the next snapshot number
+    const snapshotNumber = previousSnapshot ? previousSnapshot.number + 1 : 1;
+    const snapshot = await this.snapshotRepository.create(directory.id, snapshotNumber);
 
     let previousBlobMap: Record<string, PrismaBlob> = {};
     let previousObjects = [];
@@ -40,8 +43,6 @@ export class SnapshotService {
     // Need to extend this type to allow hash matching in the in creation of
     // the objects.
     const objectData: (Prisma.ObjectCreateManyInput & {hash?: string})[] = [];
-    console.log("logging fileSystemObjects");
-    console.log(fileSystemObjects);
     for (const fileSystemObject of fileSystemObjects) {
       // It's a file - prepare object and blob data
       if (fileSystemObject.content !== undefined) {

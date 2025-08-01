@@ -97,41 +97,41 @@ async function readDirectoryStructure(dirPath: string, basePath: string = dirPat
 export async function assertDirectoryStructureEquals(
   actualDirPath: string,
   expectedStructure: Record<string, string | Record<string, any>>,
-  message: string = "Directory structure mismatch"
 ): Promise<void> {
   const actualStructure = await readDirectoryStructure(actualDirPath);
 
-  function deepEqual(actual: any, expected: any, path: string = ""): void {
-    if (typeof expected === 'string') {
-      if (typeof actual !== 'string') {
-        throw new Error(`${message}: Expected file at '${path}', but found ${typeof actual}`);
-      }
-      if (actual !== expected) {
-        throw new Error(`${message}: File content mismatch at '${path}'. Expected: '${expected}', Actual: '${actual}'`);
-      }
-    } else if (typeof expected === 'object' && expected !== null) {
-      if (typeof actual !== 'object' || actual === null) {
-        throw new Error(`${message}: Expected directory at '${path}', but found ${typeof actual}`);
-      }
+  deepEqual(actualStructure, expectedStructure);
+}
 
-      // Check all expected entries exist
-      for (const [key, value] of Object.entries(expected)) {
+function deepEqual(actual: any, expected: any, path: string = ""): void {
+  const message = "Directory structure mismatch";
+  if (typeof expected === 'string') {
+    if (typeof actual !== 'string') {
+      throw new Error(`${message}: Expected file at '${path}', but found ${typeof actual}`);
+    }
+    if (actual !== expected) {
+      throw new Error(`${message}: File content mismatch at '${path}'. Expected: '${expected}', Actual: '${actual}'`);
+    }
+  } else if (typeof expected === 'object' && expected !== null) {
+    if (typeof actual !== 'object' || actual === null) {
+      throw new Error(`${message}: Expected directory at '${path}', but found ${typeof actual}`);
+    }
+
+    // Check all expected entries exist
+    for (const [key, value] of Object.entries(expected)) {
+      const currentPath = path ? `${path}/${key}` : key;
+      if (!(key in actual)) {
+        throw new Error(`${message}: Missing expected entry '${currentPath}'`);
+      }
+      deepEqual(actual[key], value, currentPath);
+    }
+
+    // Check no extra entries exist
+    for (const key of Object.keys(actual)) {
+      if (!(key in expected)) {
         const currentPath = path ? `${path}/${key}` : key;
-        if (!(key in actual)) {
-          throw new Error(`${message}: Missing expected entry '${currentPath}'`);
-        }
-        deepEqual(actual[key], value, currentPath);
-      }
-
-      // Check no extra entries exist
-      for (const key of Object.keys(actual)) {
-        if (!(key in expected)) {
-          const currentPath = path ? `${path}/${key}` : key;
-          throw new Error(`${message}: Unexpected entry '${currentPath}' found`);
-        }
+        throw new Error(`${message}: Unexpected entry '${currentPath}' found`);
       }
     }
   }
-
-  deepEqual(actualStructure, expectedStructure);
 }

@@ -1,6 +1,5 @@
 import { prisma } from '../../lib/prisma';
-import { Object as PrismaObject } from '@prisma/client';
-import { FileSystemEntry } from '../filesystem/FilesystemRepository';
+import { FileSystemEntry } from '../filesystem/Filesystem';
 
 export class ObjectRepository {
 
