@@ -13,9 +13,12 @@ export class SnapshotRepository {
     });
   }
 
-  async findByIdWithObjectsAndBlobs(id: number) {
-    return await prisma.snapshot.findUnique({
-      where: { id },
+  async findByDirectoryAndNumberWithObjectsAndBlobs(directoryId: number, number: number) {
+    return await prisma.snapshot.findFirst({
+      where: {
+        directoryId,
+        number
+      },
       include: {
         objects: {
           include: {

@@ -12,24 +12,53 @@ program
   .version('1.0.0');
 
 // Command 1: List all snapshots for directory
-async function listSnapshots(path: string) {
-  const snapshots = await Filer.listSnapshots(path);
 
-  if (snapshots.length === 0) {
-    console.log(`No snapshots found for directory: ${path}`);
-    return;
-  }
+program
+  .command('list <path>')
+  .description('List all snapshots for the specified directory path')
+  .action(async function (path: string) {
+    const snapshots = await Filer.listSnapshots(path);
 
-  // Create formatted output with number and datetime columns
-  console.log('Number  Datetime');
-  console.log('------  --------');
+    if (snapshots.length === 0) {
+      console.log(`No snapshots found for directory: ${path}`);
+      return;
+    }
 
-  for (const snapshot of snapshots) {
-    const numberStr = snapshot.number.toString().padEnd(6);
-    const formattedDate = formatDate(snapshot.date);
-    console.log(`${numberStr}  ${formattedDate}`);
-  }
-}
+    // Create formatted output with number and datetime columns
+    console.log('Number  Datetime');
+    console.log('------  --------');
+
+    for (const snapshot of snapshots) {
+      const numberStr = snapshot.number.toString().padEnd(6);
+      const formattedDate = formatDate(snapshot.date);
+      console.log(`${numberStr}  ${formattedDate}`);
+    }
+  });
+
+program
+  .command('snapshot <path>')
+  .description('Create a new snapshot for the specified directory path')
+  .action(async (path: string) => {
+    await Filer.createSnapshot(path);
+  });
+
+program
+  .command('restore <target-directory> <snapshot-number> <output-directory>')
+  .description('Restore a snapshot to the specified output directory')
+  .action(async (targetDirectory: string, snapshotNumber: string, outputDirectory: string) => {
+    const snapNum = parseInt(snapshotNumber);
+    const restoredPath = await Filer.restoreSnapshot(targetDirectory, snapNum, outputDirectory);
+    console.log(`Snapshot ${snapNum} restored to: ${restoredPath}`);
+  });
+
+program
+  .command('prune <target-directory> <snapshot-number>')
+  .description('Prune (delete) a specific snapshot')
+  .action(async (targetDirectory: string, snapshotNumber: string) => {
+    const snapNum = parseInt(snapshotNumber);
+    await Filer.pruneSnapshot(targetDirectory, snapNum);
+    console.log(`Snapshot ${snapNum} pruned from directory: ${targetDirectory}`);
+  });
 
 function formatDate(date: Date): string {
   const months = [
@@ -47,21 +76,7 @@ function formatDate(date: Date): string {
   return `${month} ${day}, ${year} - ${hours}:${minutes}:${seconds}`;
 }
 
-async function createSnapshot(path: string) {
-  await Filer.createSnapshot(path);
-}
-
-program
-  .command('list <path>')
-  .description('List all snapshots for the specified directory path')
-  .action(listSnapshots);
-
-program
-  .command('create <path>')
-  .description('Create a new snapshot for the specified directory path')
-  .action(createSnapshot);
-
-async function main() {
+(async function main() {
   try {
     await program.parseAsync(process.argv);
   } catch (error) {
@@ -70,6 +85,4 @@ async function main() {
   } finally {
     await disconnectPrisma();
   }
-}
-
-main();
+})();

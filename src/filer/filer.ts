@@ -13,8 +13,8 @@ export class Filer {
     return await this.snapshotCreateService.createSnapshot(path);
   }
 
-  static async restoreSnapshot(snapshotId: number, directoryPath: string) {
-    return await this.snapshotRestoreService.restoreSnapshot(snapshotId, directoryPath);
+  static async restoreSnapshot(directoryPath: string, snapshotNumber: number, outputDirectory: string) {
+    return await this.snapshotRestoreService.restoreSnapshot(directoryPath, snapshotNumber, outputDirectory);
   }
 
   static async pruneSnapshot(path: string, snapshotNumber: number) {
