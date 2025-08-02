@@ -8,7 +8,6 @@ import { Prisma, Blob as PrismaBlob } from '@prisma/client';
 import { hashifyContent } from '../../lib/cryptoHelper';
 import { objectFromEntries } from '../../lib/generic';
 
-
 export class CreateService {
   private snapshotRepository = new SnapshotRepository();
   private directoryRepository = new DirectoryRepository();
@@ -19,48 +18,55 @@ export class CreateService {
     const fileSystemObjects = await Filesystem.read(path);
     const files = fileSystemObjects.filter(obj => obj.content !== undefined);
     const directories = fileSystemObjects.filter(obj => obj.content === undefined);
+    const filePathHashMap = Object.fromEntries(files.map(file => [file.path, hashifyContent(file.content!)]));
 
     const directory = await this.directoryRepository.findOrCreate(path);
     const previousSnapshot = await this.snapshotRepository.findLatestByDirectory(directory.id);
     const snapshot = await this.snapshotRepository.create(directory.id, previousSnapshot);
 
-    // Get all blobs from the previous snapshot
-    let previousBlobMap: Record<string, PrismaBlob> = {};
-    if (previousSnapshot) {
-      const previousBlobs = await this.blobRepository.blobsForSnapshot(previousSnapshot.id);
-      previousBlobMap = objectFromEntries('hash', previousBlobs);
-    }
+    // Get ALL existing blobs by hash (much safer than just previous snapshot)
+    const existingBlobs = await this.blobRepository.findManyByHashes(
+      Object.values(filePathHashMap)
+    );
+    const existingBlobMap = objectFromEntries('hash', existingBlobs);
 
     // Prepare fileObjects from files on disk. Prepare blobs from files on disk when they don't exist yet.
     const newBlobs: Prisma.BlobCreateManyInput[] = [];
     const fileObjects = [];
+    const processedHashes = new Set<string>(); // Track hashes we've already processed in this snapshot
     for (const file of files) {
-      const hash = hashifyContent(file.content!);
-      if (!previousBlobMap[hash]) {
+      const hash = filePathHashMap[file.path];
+
+      // Only create blob if
+      // 1. it doesn't exist anywhere in database.
+      // 2. AND we haven't already processed it in this snapshot.
+      //    This is needed because we can have multiple files with the same content in the same snapshot
+      if (!existingBlobMap[hash] && !processedHashes.has(hash)) {
         newBlobs.push({ data: file.content!, hash });
+        processedHashes.add(hash);
       }
 
+      // hash is added here temporarily to match with blobIds
       fileObjects.push({ name: file.path, hash });
     }
 
     const newlyCreatedBlobs = await this.blobRepository.createMany(newBlobs);
-
     const newlyCreatedBlobsMap = objectFromEntries('hash', newlyCreatedBlobs);
+
     // Populate file objects with their blob id from previous and new blob id maps
     // and all objects with snapshotId
     // Do not return hash, as that was only needed temporarily for blob lookup
     const fileObjectsToCreate = fileObjects.map(({ name, hash }) => ({
       snapshotId: snapshot.id,
       name,
-      blobId: previousBlobMap[hash]?.id || newlyCreatedBlobsMap[hash]?.id
+      blobId: existingBlobMap[hash]?.id || newlyCreatedBlobsMap[hash]?.id
     }))
     const directoryObjectsToCreate = directories.map(dir => ({
       snapshotId: snapshot.id,
       name: dir.path
     }))
 
-    const objects: Prisma.ObjectCreateManyInput[] = [...fileObjectsToCreate,...directoryObjectsToCreate];
-    await this.objectRepository.createMany(objects);
+    await this.objectRepository.createMany([...fileObjectsToCreate, ...directoryObjectsToCreate]);
 
     return snapshot;
   }

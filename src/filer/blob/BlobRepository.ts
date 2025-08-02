@@ -34,17 +34,13 @@ export class BlobRepository {
   }
 
   /**
-   * Get all blobs that are referenced by objects in a specific snapshot
+   * Find existing blobs by their hashes (safer for deduplication)
    */
-  async blobsForSnapshot(snapshotId: number): Promise<PrismaBlob[]> {
+  async findManyByHashes(hashes: string[]): Promise<PrismaBlob[]> {
+    if (hashes.length === 0) return [];
+
     return await prisma.blob.findMany({
-      where: {
-        objects: {
-          some: {
-            snapshotId: snapshotId
-          }
-        }
-      }
+      where: { hash: { in: hashes } }
     });
   }
   async createMany(blobs: Prisma.BlobCreateManyInput[]): Promise<PrismaBlob[]> {

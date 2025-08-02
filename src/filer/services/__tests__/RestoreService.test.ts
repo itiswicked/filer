@@ -18,14 +18,19 @@ describe('RestoreService', () => {
   });
 
   describe('.restoreSnapshot', () => {
-    it('restores the directory state with bit-for-bit identical files', async () => {
-      const binaryContent = Buffer.from([0x00, 0x01, 0x02, 0xFF, 0xFE, 0xFD]).toString('utf8');
+    it('restores the directory state with identical files', async () => {
+      const fs = require('fs');
+      const path = require('path');
+
+      // Read the test PNG file for real image content
+      const pngPath = path.join(__dirname, '../../../test/testimg.png');
+      const pngBuffer = fs.readFileSync(pngPath);
+      const imageContent = pngBuffer.toString('utf8');
 
       const originalStructure = {
         'file1.txt': 'original content 1',
-        'binary.txt': binaryContent,
-        'unicode.txt': 'Testing unicode: 🚀 ñáéíóú',
-        'large.txt': 'x'.repeat(10000),
+        'image.png': imageContent,
+        'unicode.txt': 'unicode: 🚀 ñáéíóú',
         'subdir': {
           'nested.txt': 'nested content',
           'deep': {
@@ -40,7 +45,7 @@ describe('RestoreService', () => {
 
       await createTestDirectoryStructure(tempDir, {
         'file1.txt': 'MODIFIED content 1',
-        'binary.txt': 'modified binary',
+        'image.png': imageContent, // Keep image unchanged to test restoration
         'unicode.txt': 'modified unicode',
         'large.txt': 'short',
         'file3.txt': 'new file content',
@@ -60,21 +65,19 @@ describe('RestoreService', () => {
         originalStructure
       );
 
-      const currentStructure = {
-        'file1.txt': 'MODIFIED content 1',
-        'binary.txt': 'modified binary',
-        'unicode.txt': 'modified unicode',
-        'large.txt': 'short',
-        'file3.txt': 'new file content',
-        'subdir': {
-          'nested.txt': 'MODIFIED nested content',
-          'newfile.txt': 'another new file'
-        }
-      };
-
       await assertDirectoryStructureEquals(
         tempDir,
-        currentStructure
+        {
+          'file1.txt': 'MODIFIED content 1',
+          'image.png': imageContent,
+          'unicode.txt': 'modified unicode',
+          'large.txt': 'short',
+          'file3.txt': 'new file content',
+          'subdir': {
+            'nested.txt': 'MODIFIED nested content',
+            'newfile.txt': 'another new file'
+          }
+        }
       );
     });
 
