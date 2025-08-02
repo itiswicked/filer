@@ -14,13 +14,14 @@ program
 // Command 1: List all snapshots for directory
 
 program
-  .command('list <path>')
+  .command('list')
   .description('List all snapshots for the specified directory path')
-  .action(async function (path: string) {
-    const snapshots = await Filer.listSnapshots(path);
+  .requiredOption('--target-directory <path>', 'Directory path to list snapshots for')
+  .action(async function (options: { targetDirectory: string }) {
+    const snapshots = await Filer.listSnapshots(options.targetDirectory);
 
     if (snapshots.length === 0) {
-      console.log(`No snapshots found for directory: ${path}`);
+      console.log(`No snapshots found for directory: ${options.targetDirectory}`);
       return;
     }
 
@@ -36,28 +37,35 @@ program
   });
 
 program
-  .command('snapshot <path>')
+  .command('snapshot')
   .description('Create a new snapshot for the specified directory path')
-  .action(async (path: string) => {
-    await Filer.createSnapshot(path);
+  .requiredOption('--target-directory <path>', 'Directory path to create snapshot for')
+  .action(async (options: { targetDirectory: string }) => {
+    await Filer.createSnapshot(options.targetDirectory);
+    console.log(`Snapshot created for directory: ${options.targetDirectory}`);
   });
 
 program
-  .command('restore <target-directory> <snapshot-number> <output-directory>')
+  .command('restore')
   .description('Restore a snapshot to the specified output directory')
-  .action(async (targetDirectory: string, snapshotNumber: string, outputDirectory: string) => {
-    const snapNum = parseInt(snapshotNumber);
-    const restoredPath = await Filer.restoreSnapshot(targetDirectory, snapNum, outputDirectory);
+  .requiredOption('--target-directory <path>', 'Directory path where the snapshot was originally taken from')
+  .requiredOption('--snapshot-number <number>', 'Snapshot number to restore')
+  .requiredOption('--output-directory <path>', 'Directory path to restore snapshot to')
+  .action(async (options: { targetDirectory: string, snapshotNumber: string, outputDirectory: string }) => {
+    const snapNum = parseInt(options.snapshotNumber);
+    const restoredPath = await Filer.restoreSnapshot(options.targetDirectory, snapNum, options.outputDirectory);
     console.log(`Snapshot ${snapNum} restored to: ${restoredPath}`);
   });
 
 program
-  .command('prune <target-directory> <snapshot-number>')
+  .command('prune')
   .description('Prune (delete) a specific snapshot')
-  .action(async (targetDirectory: string, snapshotNumber: string) => {
-    const snapNum = parseInt(snapshotNumber);
-    await Filer.pruneSnapshot(targetDirectory, snapNum);
-    console.log(`Snapshot ${snapNum} pruned from directory: ${targetDirectory}`);
+  .requiredOption('--target-directory <path>', 'Directory path containing the snapshot to prune')
+  .requiredOption('--snapshot-number <number>', 'Snapshot number to prune')
+  .action(async (options: { targetDirectory: string, snapshotNumber: string }) => {
+    const snapNum = parseInt(options.snapshotNumber);
+    await Filer.pruneSnapshot(options.targetDirectory, snapNum);
+    console.log(`Snapshot ${snapNum} pruned from directory: ${options.targetDirectory}`);
   });
 
 function formatDate(date: Date): string {

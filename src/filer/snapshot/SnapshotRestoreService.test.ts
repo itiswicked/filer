@@ -52,7 +52,8 @@ describe('SnapshotRestoreService', () => {
 
       await snapshotCreateService.createSnapshot(tempDir);
 
-      const restorePath = await snapshotRestoreService.restoreSnapshot(firstSnapshot.id, tempDir);
+      const restoreDir = tempDir + '_restore';
+      const restorePath = await snapshotRestoreService.restoreSnapshot(tempDir, firstSnapshot.number, restoreDir);
 
       await assertDirectoryStructureEquals(
         restorePath,
@@ -85,7 +86,8 @@ describe('SnapshotRestoreService', () => {
         'added_later.txt': 'this should not be in restore'
       });
 
-      const restorePath = await snapshotRestoreService.restoreSnapshot(snapshot.id, tempDir);
+      const restoreDir = tempDir + '_restore';
+      const restorePath = await snapshotRestoreService.restoreSnapshot(tempDir, snapshot.number, restoreDir);
 
       await assertDirectoryStructureEquals(
         restorePath,
