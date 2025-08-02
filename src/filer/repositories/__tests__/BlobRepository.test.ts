@@ -1,5 +1,5 @@
-import { BlobRepository } from './BlobRepository';
-import { prisma } from '../../lib/prisma';
+import { BlobRepository } from '../BlobRepository';
+import { prisma } from '../../../lib/prisma';
 
 describe('BlobRepository', () => {
   let blobRepository: BlobRepository;

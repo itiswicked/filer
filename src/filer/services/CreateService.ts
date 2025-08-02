@@ -1,11 +1,11 @@
-import { SnapshotRepository } from '../snapshot/SnapshotRepository';
-import { DirectoryRepository } from '../directory/DirectoryRepository';
-import { BlobRepository } from '../blob/BlobRepository';
+import { SnapshotRepository } from '../repositories/SnapshotRepository';
+import { DirectoryRepository } from '../repositories/DirectoryRepository';
+import { BlobRepository } from '../repositories/BlobRepository';
 import { Snapshot } from '@prisma/client';
-import { Filesystem } from '../filesystem/Filesystem';
-import { ObjectRepository } from '../object/ObjectRepository';
+import { Filesystem } from '../../lib/Filesystem';
+import { ObjectRepository } from '../repositories/ObjectRepository';
 import { Prisma, Blob as PrismaBlob } from '@prisma/client';
-import { hashifyContent } from '../../lib/cryptoHelper';
+import { hashifyContent } from '../../lib/crypto';
 import { objectFromEntries } from '../../lib/generic';
 
 export class CreateService {

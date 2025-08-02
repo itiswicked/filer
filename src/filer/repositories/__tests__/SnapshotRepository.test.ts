@@ -1,6 +1,5 @@
-import { SnapshotRepository } from './SnapshotRepository';
-import { DirectoryRepository } from '../directory/DirectoryRepository';
-import { prisma } from '../../lib/prisma';
+import { SnapshotRepository } from '../SnapshotRepository';
+import { DirectoryRepository } from '../DirectoryRepository';
 
 describe('SnapshotRepository', () => {
   let snapshotRepository: SnapshotRepository;

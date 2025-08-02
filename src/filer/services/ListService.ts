@@ -1,4 +1,4 @@
-import { SnapshotRepository } from '../snapshot/SnapshotRepository';
+import { SnapshotRepository } from '../repositories/SnapshotRepository';
 
 export interface SnapshotListItem {
   number: number;

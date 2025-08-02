@@ -3,7 +3,7 @@ import {
   createTempDirectory,
   createTestDirectoryStructure,
   cleanupTempDirectory
-} from '../../test/helpers';
+} from '../test/helpers';
 
 describe('Filesystem', () => {
   let tempDir: string;

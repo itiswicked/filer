@@ -1,6 +1,6 @@
-import { SnapshotRepository } from '../snapshot/SnapshotRepository';
-import { DirectoryRepository } from '../directory/DirectoryRepository';
-import { Filesystem, FileSystemEntry } from '../filesystem/Filesystem';
+import { SnapshotRepository } from '../repositories/SnapshotRepository';
+import { DirectoryRepository } from '../repositories/DirectoryRepository';
+import { Filesystem, FileSystemEntry } from '../../lib/Filesystem';
 
 export class RestoreService {
   private snapshotRepository = new SnapshotRepository();
@@ -20,7 +20,6 @@ export class RestoreService {
       throw new Error(`Snapshot with number ${snapshotNumber} not found for directory: ${directoryPath}`);
     }
 
-    const snapshotDate = snapshot.createdAt.toISOString().replace(/[:\s]/g, '_');
 
     const fileSystemEntries: FileSystemEntry[] = snapshot.objects.map(obj => ({
       path: obj.name,
