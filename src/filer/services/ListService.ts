@@ -1,11 +1,11 @@
-import { SnapshotRepository } from './SnapshotRepository';
+import { SnapshotRepository } from '../snapshot/SnapshotRepository';
 
 export interface SnapshotListItem {
   number: number;
   date: Date;
 }
 
-export class SnapshotListService {
+export class ListService {
   private snapshotRepository = new SnapshotRepository();
 
     async listSnapshots(directoryPath: string): Promise<SnapshotListItem[]> {

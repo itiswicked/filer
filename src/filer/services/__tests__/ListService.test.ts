@@ -1,17 +1,17 @@
-import { SnapshotListService, SnapshotListItem } from './SnapshotListService';
-import { SnapshotCreateService } from './SnapshotCreateService';
-import { prisma } from '../../lib/prisma';
-import { createTempDirectory, createTestDirectoryStructure, cleanupTempDirectory } from '../../test/helpers';
+import { ListService, SnapshotListItem } from '../ListService';
+import { CreateService } from '../CreateService';
+import { prisma } from '../../../lib/prisma';
+import { createTempDirectory, createTestDirectoryStructure, cleanupTempDirectory } from '../../../test/helpers';
 
-describe('SnapshotListService', () => {
+describe('ListService', () => {
   let tempDir: string;
-  let snapshotListService: SnapshotListService;
-  let snapshotCreateService: SnapshotCreateService;
+  let listService: ListService;
+  let createService: CreateService;
 
   beforeEach(async () => {
     tempDir = await createTempDirectory();
-    snapshotListService = new SnapshotListService();
-    snapshotCreateService = new SnapshotCreateService();
+    listService = new ListService();
+    createService = new CreateService();
   });
 
   afterEach(async () => {
@@ -20,7 +20,7 @@ describe('SnapshotListService', () => {
 
   describe('.listSnapshots', () => {
     it('returns empty array when no snapshots exist for directory', async () => {
-      const result = await snapshotListService.listSnapshots('/nonexistent/path');
+      const result = await listService.listSnapshots('/nonexistent/path');
 
       expect(result).toEqual([]);
     });
@@ -30,9 +30,9 @@ describe('SnapshotListService', () => {
         'file1.txt': 'hello'
       });
 
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
-      const result = await snapshotListService.listSnapshots(tempDir);
+      const result = await listService.listSnapshots(tempDir);
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
@@ -45,21 +45,21 @@ describe('SnapshotListService', () => {
       await createTestDirectoryStructure(tempDir, {
         'file1.txt': 'hello'
       });
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
       await createTestDirectoryStructure(tempDir, {
         'file1.txt': 'hello',
         'file2.txt': 'world'
       });
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
       await createTestDirectoryStructure(tempDir, {
         'file1.txt': 'modified',
         'file2.txt': 'world'
       });
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
-      const result = await snapshotListService.listSnapshots(tempDir);
+      const result = await listService.listSnapshots(tempDir);
 
       expect(result).toHaveLength(3);
 
@@ -81,18 +81,18 @@ describe('SnapshotListService', () => {
         await createTestDirectoryStructure(tempDir, {
           'file1.txt': 'hello'
         });
-        await snapshotCreateService.createSnapshot(tempDir);
+        await createService.createSnapshot(tempDir);
 
         await createTestDirectoryStructure(tempDir2, {
           'file2.txt': 'world'
         });
-        await snapshotCreateService.createSnapshot(tempDir2);
+        await createService.createSnapshot(tempDir2);
 
-        const result1 = await snapshotListService.listSnapshots(tempDir);
+        const result1 = await listService.listSnapshots(tempDir);
         expect(result1).toHaveLength(1);
         expect(result1[0].number).toBe(1);
 
-        const result2 = await snapshotListService.listSnapshots(tempDir2);
+        const result2 = await listService.listSnapshots(tempDir2);
         expect(result2).toHaveLength(1);
         expect(result2[0].number).toBe(1);
       } finally {

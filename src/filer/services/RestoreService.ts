@@ -1,8 +1,8 @@
-import { SnapshotRepository } from './SnapshotRepository';
+import { SnapshotRepository } from '../snapshot/SnapshotRepository';
 import { DirectoryRepository } from '../directory/DirectoryRepository';
 import { Filesystem, FileSystemEntry } from '../filesystem/Filesystem';
 
-export class SnapshotRestoreService {
+export class RestoreService {
   private snapshotRepository = new SnapshotRepository();
   private directoryRepository = new DirectoryRepository();
 

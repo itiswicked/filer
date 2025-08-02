@@ -1,4 +1,5 @@
 import { prisma } from '../../lib/prisma';
+import { Prisma, Blob as PrismaBlob } from '@prisma/client';
 
 export class BlobRepository {
   /**
@@ -32,4 +33,22 @@ export class BlobRepository {
     return result.count;
   }
 
+  /**
+   * Get all blobs that are referenced by objects in a specific snapshot
+   */
+  async blobsForSnapshot(snapshotId: number): Promise<PrismaBlob[]> {
+    return await prisma.blob.findMany({
+      where: {
+        objects: {
+          some: {
+            snapshotId: snapshotId
+          }
+        }
+      }
+    });
+  }
+  async createMany(blobs: Prisma.BlobCreateManyInput[]): Promise<PrismaBlob[]> {
+    if (blobs.length === 0) return [];
+    return await prisma.blob.createManyAndReturn({ data: blobs });
+  }
 }

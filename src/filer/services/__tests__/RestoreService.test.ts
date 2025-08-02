@@ -1,16 +1,16 @@
-import { SnapshotCreateService } from './SnapshotCreateService';
-import { SnapshotRestoreService } from './SnapshotRestoreService';
-import { createTempDirectory, createTestDirectoryStructure, cleanupTempDirectory, assertDirectoryStructureEquals } from '../../test/helpers';
+import { CreateService } from '../CreateService';
+import { RestoreService } from '../RestoreService';
+import { createTempDirectory, createTestDirectoryStructure, cleanupTempDirectory, assertDirectoryStructureEquals } from '../../../test/helpers';
 
-describe('SnapshotRestoreService', () => {
+describe('RestoreService', () => {
   let tempDir: string;
-  let snapshotCreateService: SnapshotCreateService;
-  let snapshotRestoreService: SnapshotRestoreService;
+  let createService: CreateService;
+  let restoreService: RestoreService;
 
   beforeEach(async () => {
     tempDir = await createTempDirectory();
-    snapshotCreateService = new SnapshotCreateService();
-    snapshotRestoreService = new SnapshotRestoreService();
+    createService = new CreateService();
+    restoreService = new RestoreService();
   });
 
   afterEach(async () => {
@@ -36,7 +36,7 @@ describe('SnapshotRestoreService', () => {
 
       await createTestDirectoryStructure(tempDir, originalStructure);
 
-      const firstSnapshot = await snapshotCreateService.createSnapshot(tempDir);
+      const firstSnapshot = await createService.createSnapshot(tempDir);
 
       await createTestDirectoryStructure(tempDir, {
         'file1.txt': 'MODIFIED content 1',
@@ -50,10 +50,10 @@ describe('SnapshotRestoreService', () => {
         }
       });
 
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
       const restoreDir = tempDir + '_restore';
-      const restorePath = await snapshotRestoreService.restoreSnapshot(tempDir, firstSnapshot.number, restoreDir);
+      const restorePath = await restoreService.restoreSnapshot(tempDir, firstSnapshot.number, restoreDir);
 
       await assertDirectoryStructureEquals(
         restorePath,
@@ -80,14 +80,14 @@ describe('SnapshotRestoreService', () => {
 
     it('restores empty directory snapshot correctly', async () => {
       await createTestDirectoryStructure(tempDir, {});
-      const snapshot = await snapshotCreateService.createSnapshot(tempDir);
+      const snapshot = await createService.createSnapshot(tempDir);
 
       await createTestDirectoryStructure(tempDir, {
         'added_later.txt': 'this should not be in restore'
       });
 
       const restoreDir = tempDir + '_restore';
-      const restorePath = await snapshotRestoreService.restoreSnapshot(tempDir, snapshot.number, restoreDir);
+      const restorePath = await restoreService.restoreSnapshot(tempDir, snapshot.number, restoreDir);
 
       await assertDirectoryStructureEquals(
         restorePath,

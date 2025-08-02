@@ -1,18 +1,9 @@
 import { prisma } from '../../lib/prisma';
-import { FileSystemEntry } from '../filesystem/Filesystem';
+import { Prisma } from '@prisma/client';
 
 export class ObjectRepository {
-
-  async createMany(snapshotId: number, files: FileSystemEntry[]): Promise<void> {
-    const objectData = [];
-    for (const file of files) {
-      objectData.push({
-        snapshotId,
-        name: file.path,
-      });
-    }
-
-    await prisma.object.createMany({ data: objectData });
+  async createMany(objects: Prisma.ObjectCreateManyInput[]): Promise<void> {
+    await prisma.object.createMany({ data: objects });
   }
 
   async findMany(snapshotId: number) {

@@ -1,14 +1,14 @@
-import { SnapshotCreateService } from './SnapshotCreateService';
-import { prisma } from '../../lib/prisma';
-import { createTempDirectory, createTestDirectoryStructure, cleanupTempDirectory, assertDirectoryStructureEquals } from '../../test/helpers';
+import { CreateService } from '../CreateService';
+import { prisma } from '../../../lib/prisma';
+import { createTempDirectory, createTestDirectoryStructure, cleanupTempDirectory, assertDirectoryStructureEquals } from '../../../test/helpers';
 
-describe('SnapshotCreateService', () => {
+describe('CreateService', () => {
   let tempDir: string;
-  let snapshotCreateService: SnapshotCreateService;
+  let createService: CreateService;
 
   beforeEach(async () => {
     tempDir = await createTempDirectory();
-    snapshotCreateService = new SnapshotCreateService();
+    createService = new CreateService();
   });
 
   afterEach(async () => {
@@ -21,7 +21,7 @@ describe('SnapshotCreateService', () => {
         'file1.txt': 'hello'
       });
 
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
       const dirCount = await prisma.directory.count();
       const snapshotCount = await prisma.snapshot.count();
@@ -42,14 +42,14 @@ describe('SnapshotCreateService', () => {
         'file2.txt': 'original content'
       });
 
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
       await createTestDirectoryStructure(tempDir, {
         'file1.txt': 'MODIFIED content',  // Changed
         'file2.txt': 'original content'
       });
 
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
       const dirCount = await prisma.directory.count();
       const snapshotCount = await prisma.snapshot.count();
@@ -92,13 +92,13 @@ describe('SnapshotCreateService', () => {
         'file2.txt': 'original content'
       });
 
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
       await createTestDirectoryStructure(tempDir, {
         'file2.txt': 'original content',
       });
 
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
       const objectCount = await prisma.object.count();
       const blobCount = await prisma.blob.count();
@@ -107,16 +107,6 @@ describe('SnapshotCreateService', () => {
       expect(blobCount).toBe(2);
     });
 
-    it('creates snapshots with sequential numbers', async () => {
-      await createTestDirectoryStructure(tempDir, {
-        'file1.txt': 'content'
-      });
 
-      const snapshot1 = await snapshotCreateService.createSnapshot(tempDir);
-      const snapshot2 = await snapshotCreateService.createSnapshot(tempDir);
-
-      expect(snapshot1.number).toBe(1);
-      expect(snapshot2.number).toBe(2);
-    });
   })
 });

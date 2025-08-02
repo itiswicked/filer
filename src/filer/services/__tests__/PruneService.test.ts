@@ -1,17 +1,17 @@
-import { SnapshotCreateService } from './SnapshotCreateService';
-import { SnapshotPruneService } from './SnapshotPruneService';
-import { prisma } from '../../lib/prisma';
-import { createTempDirectory, createTestDirectoryStructure, cleanupTempDirectory } from '../../test/helpers';
+import { CreateService } from '../CreateService';
+import { PruneService } from '../PruneService';
+import { prisma } from '../../../lib/prisma';
+import { createTempDirectory, createTestDirectoryStructure, cleanupTempDirectory } from '../../../test/helpers';
 
-describe('SnapshotPruneService', () => {
+describe('PruneService', () => {
   let tempDir: string;
-  let snapshotCreateService: SnapshotCreateService;
-  let snapshotPruneService: SnapshotPruneService;
+  let createService: CreateService;
+  let pruneService: PruneService;
 
   beforeEach(async () => {
     tempDir = await createTempDirectory();
-    snapshotCreateService = new SnapshotCreateService();
-    snapshotPruneService = new SnapshotPruneService();
+    createService = new CreateService();
+    pruneService = new PruneService();
   });
 
   afterEach(async () => {
@@ -21,18 +21,18 @@ describe('SnapshotPruneService', () => {
   describe('.pruneSnapshot', () => {
     it('should raise an error when trying to prune from a non-existent directory', async () => {
       await expect(
-        snapshotPruneService.pruneSnapshot('/path/that/does/not/exist', 1)
+        pruneService.pruneSnapshot('/path/that/does/not/exist', 1)
       ).rejects.toThrow('Directory not found: /path/that/does/not/exist');
     });
 
     it('should raise an error when trying to prune a non-existent snapshot', async () => {
       // Create directory entry by creating a snapshot first
       await createTestDirectoryStructure(tempDir, { 'file.txt': 'content' });
-      await snapshotCreateService.createSnapshot(tempDir);
+      await createService.createSnapshot(tempDir);
 
       // Now try to prune a non-existent snapshot number
       await expect(
-        snapshotPruneService.pruneSnapshot(tempDir, 999)
+        pruneService.pruneSnapshot(tempDir, 999)
       ).rejects.toThrow('Snapshot with number 999 not found');
     });
     it('should delete the specified snapshot when it exists', async () => {

@@ -1,8 +1,8 @@
-import { SnapshotRepository } from './SnapshotRepository';
+import { SnapshotRepository } from '../snapshot/SnapshotRepository';
 import { DirectoryRepository } from '../directory/DirectoryRepository';
 import { BlobRepository } from '../blob/BlobRepository';
 
-export class SnapshotPruneService {
+export class PruneService {
   private snapshotRepository = new SnapshotRepository();
   private directoryRepository = new DirectoryRepository();
   private blobRepository = new BlobRepository();

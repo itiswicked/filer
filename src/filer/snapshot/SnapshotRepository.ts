@@ -2,7 +2,8 @@ import { prisma } from '../../lib/prisma';
 import { Snapshot } from '@prisma/client';
 
 export class SnapshotRepository {
-  async create(directoryId: number, number: number): Promise<Snapshot> {
+  async create(directoryId: number, previousSnapshot?: Snapshot | null): Promise<Snapshot> {
+    const number = this.calculateNextNumber(previousSnapshot);
     return await prisma.snapshot.create({data: { directoryId, number }});
   }
 
@@ -56,4 +57,9 @@ export class SnapshotRepository {
       }
     });
   }
+
+  private calculateNextNumber(previousSnapshot?: Snapshot | null): number {
+    return previousSnapshot ? previousSnapshot.number + 1 : 1;
+  }
+
 }

@@ -1,27 +1,27 @@
-import { SnapshotCreateService } from './snapshot/SnapshotCreateService';
-import { SnapshotRestoreService } from './snapshot/SnapshotRestoreService';
-import { SnapshotPruneService } from './snapshot/SnapshotPruneService';
-import { SnapshotListService } from './snapshot/SnapshotListService';
+import { CreateService } from './services/CreateService';
+import { RestoreService } from './services/RestoreService';
+import { PruneService } from './services/PruneService';
+import { ListService } from './services/ListService';
 
 export class Filer {
-  private static snapshotCreateService = new SnapshotCreateService();
-  private static snapshotRestoreService = new SnapshotRestoreService();
-  private static snapshotPruneService = new SnapshotPruneService();
-  private static snapshotListService = new SnapshotListService();
+  private static createService = new CreateService();
+  private static restoreService = new RestoreService();
+  private static pruneService = new PruneService();
+  private static listService = new ListService();
 
   static async createSnapshot(path: string) {
-    return await this.snapshotCreateService.createSnapshot(path);
+    return await this.createService.createSnapshot(path);
   }
 
   static async restoreSnapshot(directoryPath: string, snapshotNumber: number, outputDirectory: string) {
-    return await this.snapshotRestoreService.restoreSnapshot(directoryPath, snapshotNumber, outputDirectory);
+    return await this.restoreService.restoreSnapshot(directoryPath, snapshotNumber, outputDirectory);
   }
 
   static async pruneSnapshot(path: string, snapshotNumber: number) {
-    return await this.snapshotPruneService.pruneSnapshot(path, snapshotNumber);
+    return await this.pruneService.pruneSnapshot(path, snapshotNumber);
   }
 
   static async listSnapshots(directoryPath: string) {
-    return await this.snapshotListService.listSnapshots(directoryPath);
+    return await this.listService.listSnapshots(directoryPath);
   }
 }
