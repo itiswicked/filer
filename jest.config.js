@@ -7,6 +7,7 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  setupFiles: ['<rootDir>/src/test/env-setup.ts'], // Load env vars BEFORE any imports
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
   maxWorkers: 1, // Run tests sequentially to avoid database deadlocks
 };

@@ -1,12 +1,4 @@
-import { config } from 'dotenv';
-import { resolve } from 'path';
 import { prisma } from '../lib/prisma';
-import { cleanDatabase } from './helpers';
-
-// Load test environment variables
-config({
-  path: resolve(__dirname, '../../.env.test')
-});
 
 // Clean database before each test
 beforeEach(async () => {
@@ -22,3 +14,13 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.$disconnect();
 });
+
+// Clean database function for tests
+async function cleanDatabase() {
+  await prisma.$transaction([
+    prisma.$executeRaw`TRUNCATE TABLE "blobs" CASCADE`,
+    prisma.$executeRaw`TRUNCATE TABLE "objects" CASCADE`,
+    prisma.$executeRaw`TRUNCATE TABLE "snapshots" CASCADE`,
+    prisma.$executeRaw`TRUNCATE TABLE "directory" CASCADE`
+  ]);
+}

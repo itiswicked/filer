@@ -1,18 +1,7 @@
-import { prisma } from '../lib/prisma';
 import { mkdir, rmdir, writeFile, readdir, unlink, stat, readFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-export async function cleanDatabase() {
-  await prisma.$transaction([
-    prisma.$executeRaw`TRUNCATE TABLE "blobs" CASCADE`,
-    prisma.$executeRaw`TRUNCATE TABLE "objects" CASCADE`,
-    prisma.$executeRaw`TRUNCATE TABLE "snapshots" CASCADE`,
-    prisma.$executeRaw`TRUNCATE TABLE "directory" CASCADE`
-  ]);
-}
-
-// Filesystem helpers
 export async function createTempDirectory(name?: string): Promise<string> {
   const dirName = name || `filer-test-${Date.now()}-${Math.random().toString(36).substring(2)}`;
   const testDir = join(tmpdir(), dirName);
