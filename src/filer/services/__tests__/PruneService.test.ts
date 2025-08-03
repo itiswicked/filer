@@ -1,6 +1,5 @@
 import { CreateService } from '../CreateService';
 import { PruneService } from '../PruneService';
-import { prisma } from '../../../lib/prisma';
 import { createTempDirectory, createTestDirectoryStructure, cleanupTempDirectory } from '../../../test/helpers';
 
 describe('PruneService', () => {

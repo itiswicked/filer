@@ -19,11 +19,9 @@ export class RestoreService {
     if (!snapshot) {
       throw new Error(`Snapshot with number ${snapshotNumber} not found for directory: ${directoryPath}`);
     }
-
-
     const fileSystemEntries: FileSystemEntry[] = snapshot.objects.map(obj => ({
       path: obj.name,
-      content: obj.Blob?.data
+      content: obj.Blob?.data ? Buffer.from(obj.Blob.data) : undefined
     }));
 
     await Filesystem.write(fileSystemEntries, outputDirectory);
