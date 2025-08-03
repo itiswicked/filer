@@ -38,66 +38,62 @@ Verify installation:
 
 ## Usage and Capabilities
 
-The `filer` command provides four main operations:
+NOTE: For now, just create directories here to test functionality. This is a docker development limitation.
+
+The `filer` command provides four main operations through the CLI binary located at `./bin/filer`:
 
 ### Creating Snapshots
 
-Create a snapshot of any directory:
+Create a snapshot of any directory. This captures the complete state of all files and subdirectories.
 
 ```bash
-./bin/filer snapshot --target-directory /home/user/documents
-# Output: Snapshot created for directory: /home/user/documents
+./bin/filer snapshot --target-directory ./documents
+# Output: Snapshot created for directory: ./documents
 ```
 
 ### Listing Snapshots
 
-View all snapshots for a directory:
+View all snapshots for a directory. Shows snapshot numbers and creation timestamps.
 
 ```bash
-./bin/filer list --target-directory /home/user/documents
-# Output:
-# Number  Datetime
-# ------  --------
-# 1       Jan 15, 2024 - 14:30:25
-# 2       Jan 16, 2024 - 09:15:42
-# 3       Jan 16, 2024 - 16:45:18
+./bin/filer list --target-directory ./documents
+```
+
+**When snapshots exist:**
+
+```
+Number  Datetime
+------  --------
+1       Jan 15, 2024 - 14:30:25
+2       Jan 16, 2024 - 09:15:42
+3       Jan 16, 2024 - 16:45:18
+```
+
+**When no snapshots exist:**
+
+```
+No snapshots found for directory: ./documents
 ```
 
 ### Restoring Snapshots
 
-Restore a specific snapshot to any output directory:
+Restore a specific snapshot to any output directory. The output directory will be created if it doesn't exist.
 
 ```bash
-./bin/filer restore --target-directory /home/user/documents --snapshot-number 2 --output-directory /tmp/restored-docs
+./bin/filer restore --target-directory ./documents --snapshot-number 2 --output-directory ./restored-documents
 # Output: Snapshot 2 restored to: /tmp/restored-docs
 ```
 
 ### Pruning Snapshots
 
+Remove specific snapshots to free up storage space. Only removes the snapshot metadata and any blob content not referenced by other snapshots.
+
 ```bash
-./bin/filer prune --target-directory /home/user/documents --snapshot-number 1
-# Output: Snapshot 1 pruned from directory: /home/user/documents
+./bin/filer prune --target-directory ./documents --snapshot-number 1
+# Output: Snapshot 1 pruned from directory: ./documents
 ```
 
 ## Development
-
-### Environment Configuration
-
-Create the required environment files with your database connection string:
-
-**`.env`** (for development):
-
-```bash
-DATABASE_URL=<postgres_database_dev_url>
-```
-
-**`.env.test`** (for testing):
-
-```bash
-DATABASE_URL=<postgres_database_test_url>
-```
-
-Note: When using Docker Compose, the database URL is automatically configured. These files are needed for local development or custom deployments
 
 ### Building from Source
 
@@ -115,7 +111,14 @@ npm test
 npm run dev
 ```
 
-### Database Management
+### Database Setup
+
+For development, database connection is automatically configured - no additional setup required.
+
+**Running Tests**: Tests require a separate database connection:
+
+- Create `.env.test` with: `DATABASE_URL=<test-database-url>`
+- The test database (`filer_test`) is automatically created by Docker Compose
 
 The application uses Prisma for database operations:
 
