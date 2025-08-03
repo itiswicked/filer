@@ -15,16 +15,18 @@ export class CreateService {
   private blobRepository = new BlobRepository();
 
   async createSnapshot(path: string): Promise<Snapshot> {
-    const fileSystemObjects = await Filesystem.read(path);
-    const files = fileSystemObjects.filter(obj => obj.content !== undefined);
-    const directories = fileSystemObjects.filter(obj => obj.content === undefined);
-    const filePathHashMap = Object.fromEntries(files.map(file => [file.path, hashifyContent(file.content!)]));
 
     const directory = await this.directoryRepository.findOrCreate(path);
     const previousSnapshot = await this.snapshotRepository.findLatestByDirectory(directory.id);
     const snapshot = await this.snapshotRepository.create(directory.id, previousSnapshot);
 
+    const fileSystemObjects = await Filesystem.read(path);
+    const files = fileSystemObjects.filter(obj => obj.content !== undefined);
+    const directories = fileSystemObjects.filter(obj => obj.content === undefined);
+
     // Get ALL existing blobs by hash (much safer than just previous snapshot)
+    // Create map here so we can look up hashes by path later.
+    const filePathHashMap = Object.fromEntries(files.map(file => [file.path, hashifyContent(file.content!)]));
     const existingBlobs = await this.blobRepository.findManyByHashes(
       Object.values(filePathHashMap)
     );
@@ -33,7 +35,7 @@ export class CreateService {
     // Prepare fileObjects from files on disk. Prepare blobs from files on disk when they don't exist yet.
     const newBlobs: Prisma.BlobCreateManyInput[] = [];
     const fileObjects = [];
-    const processedHashes = new Set<string>(); // Track hashes we've already processed in this snapshot
+    const processedHashes = new Set<string>(); // Track hashes we've already processed to avoid duplicates in newBlobs
     for (const file of files) {
       const hash = filePathHashMap[file.path];
 
@@ -50,12 +52,14 @@ export class CreateService {
       fileObjects.push({ name: file.path, hash });
     }
 
+
+
     const newlyCreatedBlobs = await this.blobRepository.createMany(newBlobs);
     const newlyCreatedBlobsMap = objectFromEntries('hash', newlyCreatedBlobs);
 
-    // Populate file objects with their blob id from previous and new blob id maps
-    // and all objects with snapshotId
-    // Do not return hash, as that was only needed temporarily for blob lookup
+    // Populate file objects with their blob id from existing and new blob id maps
+    // Populate all objects with snapshotId
+    // Take hash and populate blobId with map lookup
     const fileObjectsToCreate = fileObjects.map(({ name, hash }) => ({
       snapshotId: snapshot.id,
       name,
